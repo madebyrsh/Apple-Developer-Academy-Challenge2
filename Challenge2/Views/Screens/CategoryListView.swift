@@ -41,7 +41,7 @@ struct CategoryListView: View {
                 List {
                     ForEach(filteredRecords) { record in
                         NavigationLink {
-                            EditRecordView(
+                            RecordDetailView(
                                 record: record,
                                 categories: categories
                             )

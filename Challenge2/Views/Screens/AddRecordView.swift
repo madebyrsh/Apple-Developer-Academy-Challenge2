@@ -11,33 +11,72 @@ import CoreLocation
 import MapKit
 import Combine
 
-final class LocationManager: NSObject, ObservableObject, CLLocationManagerDelegate {
+final class LocationManager: NSObject, ObservableObject, CLLocationManagerDelegate { // LocationManager 시작
     
-    private let manager = CLLocationManager()
+    private let manager = CLLocationManager() // 위치 매니저 생성
     
-    @Published var latitude: Double = 0.0
-    @Published var longitude: Double = 0.0
+    @Published var latitude: Double = 0.0 // 받아온 위도 저장
+    @Published var longitude: Double = 0.0 // 받아온 경도 저장
     
-    override init() {
-        super.init()
-        manager.delegate = self
-    }
+    override init() { // init 시작
+        super.init() // NSObject 초기화
+        manager.delegate = self // delegate 연결
+        manager.desiredAccuracy = kCLLocationAccuracyHundredMeters // 너무 높은 정확도 대신 기록용으로 충분한 수준
+    } // init 종료
     
-    func requestCurrentLocation() {
-        manager.requestWhenInUseAuthorization()
-        manager.requestLocation()
-    }
+    func requestAuthorizationIfNeeded() { // 권한 요청 전용 함수 시작
+        let status = manager.authorizationStatus // 현재 권한 상태 확인
+        
+        if status == .notDetermined { // 아직 권한을 묻지 않은 상태일 때
+            manager.requestWhenInUseAuthorization() // 권한 요청
+        }
+    } // 권한 요청 전용 함수 종료
     
-    func locationManager(_ manager: CLLocationManager, didUpdateLocations locations: [CLLocation]) {
-        guard let location = locations.first else { return }
-        latitude = location.coordinate.latitude
-        longitude = location.coordinate.longitude
-    }
+    func requestCurrentLocation() { // 현재 위치 요청 함수 시작
+        
+        let status = manager.authorizationStatus // 현재 권한 상태 확인
+        
+        switch status {
+        case .notDetermined: // 아직 권한을 물어보지 않은 상태
+            manager.requestWhenInUseAuthorization() // 권한만 먼저 요청
+            
+        case .authorizedWhenInUse, .authorizedAlways: // 이미 허용된 상태
+            
+            if let currentLocation = manager.location { // 이미 캐시된 최근 위치가 있으면
+                latitude = currentLocation.coordinate.latitude // 바로 위도 반영
+                longitude = currentLocation.coordinate.longitude // 바로 경도 반영
+            } else {
+                manager.requestLocation() // 캐시가 없으면 새 위치 1회 요청
+            }
+            
+        case .denied, .restricted: // 권한 거부 또는 제한 상태
+            print("위치 권한이 거부되었거나 제한되어 있습니다.")
+            
+        @unknown default:
+            break
+        }
+        
+    } // 현재 위치 요청 함수 종료
     
-    func locationManager(_ manager: CLLocationManager, didFailWithError error: Error) {
-        print("위치 실패: \(error.localizedDescription)")
-    }
-}
+    func locationManagerDidChangeAuthorization(_ manager: CLLocationManager) { // 권한 변경 감지 시작
+        let status = manager.authorizationStatus
+        
+        if status == .authorizedWhenInUse || status == .authorizedAlways { // 권한이 허용되면
+            manager.requestLocation() // 즉시 현재 위치 요청
+        }
+    } // 권한 변경 감지 종료
+    
+    func locationManager(_ manager: CLLocationManager, didUpdateLocations locations: [CLLocation]) { // 위치 성공 콜백 시작
+        guard let location = locations.first else { return } // 첫 번째 위치만 사용
+        latitude = location.coordinate.latitude // 위도 저장
+        longitude = location.coordinate.longitude // 경도 저장
+    } // 위치 성공 콜백 종료
+    
+    func locationManager(_ manager: CLLocationManager, didFailWithError error: Error) { // 위치 실패 콜백 시작
+        print("위치 실패: \(error.localizedDescription)") // 에러 출력
+    } // 위치 실패 콜백 종료
+    
+} // LocationManager 종료
 
 struct AddRecordView: View {
     

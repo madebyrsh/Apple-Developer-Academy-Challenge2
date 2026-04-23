@@ -15,6 +15,12 @@ class MeetingRecord {
     var name: String
     var session: String
     var category: String
+    
+    var activity: String
+    var placeName: String
+    var latitude: Double
+    var longitude: Double
+
     var createdAt: Date
     
     init(name: String, session: String, category: String){
@@ -22,6 +28,12 @@ class MeetingRecord {
         self.name = name
         self.session = session
         self.category = category
+        
+        self.activity = ""
+        self.placeName = ""
+        self.latitude = 0.0
+        self.longitude = 0.0
+        
         self.createdAt = Date()
     }
 }

@@ -69,7 +69,7 @@ struct HomeView: View {
                                         isShowingAddCategoryView = true
                                     } label: {
                                         Image(systemName: "plus.circle.fill")
-                                            .font()
+                                            .font(.largeTitle)
                                             .foregroundColor(.primary)
                                     }
                                     

@@ -96,13 +96,6 @@ struct AddRecordView: View {
                     
                     if latitude != 0.0 && longitude != 0.0 {
                         
-                        Text("위도: \(latitude)")
-                            .font(.caption)
-                            .foregroundColor(.gray)
-                        
-                        Text("경도: \(longitude)")
-                            .font(.caption)
-                            .foregroundColor(.gray)
                         
                         Map(
                             initialPosition: .region(
